@@ -18,11 +18,29 @@
           <li><%= activity.description %></li>
         <% }) %>
       </ul>
-    <h2>Reviews</h2>
-    <ul>
+      
+      <form action="/destination/<%= destination.id %>/activity" method="POST">
+        <label for="activity">Add Activity:</label>
+        <textarea name="activity" required></textarea>
+        <br>
+        <button type="submit">Submit Review</button>
+      </form>
+      <h2>Reviews</h2>
+      <form action="/destination/<%= destination.id %>" method="GET">
+        <label for="rating">Filter by Rating:</label>
+        <input type="number" name="rating" value="<%= query.rating || '' %>" placeholder="Rating (1-5)">
+        <button type="submit">Filter</button>
+      </form>
+      <ul>
         <% reviews.forEach(review => { %>
-          <li>Rating: <%= review.rating %> - <%= review.comment %></li>
+          <li>Rating: <%= review.rating %>/5 - <%= review.comment %> 
+            <form action="/destination/<%= destination.id %>/review/<%= review.id %>/delete" method="POST" style="display:inline;">
+              <button type="submit">Delete Review</button>
+            </form>
+          </li>
         <% }) %>
       </ul>
+      
+  
   </body>
 </html>

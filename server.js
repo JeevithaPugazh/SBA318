@@ -4,6 +4,7 @@ const app = express();
 const PORT = 3000;
 const path = require("path");
 const error = require("./utilities/error");
+const destinations = require("./data/destinations")
 
 //middleware
 app.use(express.json());
@@ -24,7 +25,8 @@ app.use("/api/activities", activitieRoutes);
 app.use("/api/reviews", reviewsRoutes);
 
 app.get("/", (req, res) => {
-    res.render("home", { title: "Travel Guide" });
+    res.render("home", { title: "Travel Guide", destinations});
+    
   });
 
 //Adding HATEOAS links

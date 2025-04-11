@@ -3,7 +3,7 @@ const router = express.Router();
 
 const destination = require("../data/destinations");
 
-router.route("/").get((req,res)=>{
+router.get("/",(req,res)=>{
     const links = [
         {
           href: "destination/:id",
@@ -14,5 +14,7 @@ router.route("/").get((req,res)=>{
 
       res.json({destination, links});
 })
+
+
 
 module.exports = router; 

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const activities = require("../data/activities");
-const destination = require("../data/destinations");
+const destinations = require("../data/destinations");
 const reviews = require("../data/reviews");
 const { title } = require("process");
 
@@ -14,40 +14,31 @@ router.get("/", (req, res) => {
     },
   ];
 
-  res.json({ destination, links });
+  res.json({ destinations, links });
 });
 
 router.get("/:id", (req, res) => {
-  const destination = destinations.find(
+  const selectedDestination = destinations.find(
     (d) => d.id === parseInt(req.params.id)
   );
   const destinationActivities = activities.filter(
-    (a) => a.destinationId === destination.id
+    (a) => a.destinationId === selectedDestination.id
   );
-  const destinationReviews = reviews.filter(
-    (r) => r.destinationId === destination.id
-  );
-
-  //Filter reviews by query parameter
   let filteredReviews = reviews.filter(
-    (r) => r.destinationId === destination.id
+    (r) => r.destinationId === selectedDestination.id
   );
-  if (req.query.rating) {
-    filteredReviews = filteredReviews.filter(
-      (r) => r.rating === parseInt(req.query.rating)
-    );
-  }
 
-  if (!destination) {
+  if (!selectedDestination) {
     return res.status(404).send("Destination not found");
   }
 
   res.render("details", {
-    title: `${destination.name}`,
-    destination,
+    id: `${selectedDestination.id}`,
+    title: `${selectedDestination.name}`,
+    image: `${selectedDestination.image}`,
+    description: `${selectedDestination.description}`,
     activities: destinationActivities,
-    reviews: destinationReviews,
-    query: req.query,
+    reviews: filteredReviews,
   });
 });
 
@@ -61,4 +52,38 @@ router.post("/:id/activity", (req, res) => {
   res.redirect(`/${req.params.id}`);
 });
 
+//get reviews by destination id
+router.get("/:id/reviews", (req, res, next) => {
+  const destinationId = parseInt(req.params.id);
+  const rating = parseInt(req.query.rating);
+
+  const destinationReviews = reviews.filter(
+    (r) => r.destinationId === destinationId
+  );
+
+  if (!isNaN(rating)) {
+    const selectedRatings = destinationReviews.filter(
+      (d) => d.rating === rating
+    );
+    const selectedRatingsComment = selectedRatings.map(
+      (c) => c.comment
+    );
+    res.json(selectedRatingsComment);
+  } else {
+    res.json(destinationReviews);
+  }
+});
+
+//filter reviews by rating
+// router.get("/:id/reviews/:rating", (req, res, next) => {
+//   const destinationId = parseInt(req.params.id);
+//   const rating = parseInt(req.params.rating);
+//   const destinationReviews = reviews.filter(
+//     (r) => r.destinationId === destinationId
+//   );
+//   const selectedRating = destinationReviews.filter(
+//     (d) => d.rating == rating
+//   );
+//   res.json(selectedRating);
+// });
 module.exports = router;

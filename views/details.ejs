@@ -7,40 +7,42 @@
   <body>
     <h1><%= title %>😎</h1>
     <img
-      src="<%= destination.image %>"
-      alt="<%= destination.name %>"
+      src="<%= image %>"
+      alt="image:<%= title %>"
       width="200"
     />
-    <p><%= destination.description %></p>
+    <h2><%= description %></h2>
+
     <h2>Activity</h2>
     <ul>
-        <% activities.forEach(activity => { %>
-          <li><%= activity.description %></li>
-        <% }) %>
-      </ul>
-      
-      <form action="/destination/<%= destination.id %>/activity" method="POST">
-        <label for="activity">Add Activity:</label>
-        <textarea name="activity" required></textarea>
-        <br>
-        <button type="submit">Submit Review</button>
-      </form>
-      <h2>Reviews</h2>
-      <form action="/destination/<%= destination.id %>" method="GET">
-        <label for="rating">Filter by Rating:</label>
-        <input type="number" name="rating" value="<%= query.rating || '' %>" placeholder="Rating (1-5)">
-        <button type="submit">Filter</button>
-      </form>
-      <ul>
-        <% reviews.forEach(review => { %>
-          <li>Rating: <%= review.rating %>/5 - <%= review.comment %> 
-            <form action="/destination/<%= destination.id %>/review/<%= review.id %>/delete" method="POST" style="display:inline;">
-              <button type="submit">Delete Review</button>
-            </form>
-          </li>
-        <% }) %>
-      </ul>
-      
-  
+      <% activities.forEach(activity => { %>
+      <li><%= activity.description %></li>
+      <% }) %>
+    </ul>
+
+    <h2>Reviews</h2>
+    <form
+      action="/api/destinations/<%= id %>/reviews"
+      method="GET"
+    >
+      <label for="rating">Filter by Rating:</label>
+      <input
+        type="number"
+        name="rating"
+        min="1"
+        max="5"
+        value="<%= reviews.forEach(review => {review.rating}) %>"
+        placeholder="All"
+      />
+      <button type="submit">Filter</button>
+    </form>
+    <ul>
+      <% reviews.forEach(review => { %>
+      <li>
+        Rating:<%= review.rating %> - <%= review.comment%>
+      </li>
+      <br />
+      <% }) %>
+    </ul>
   </body>
 </html>

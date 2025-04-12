@@ -4,6 +4,9 @@ destinations = [{
 },
 {
   id: 2, name: 'Tokyo',country: "Japan",description: "Tech and Tradition",image:"/images/tokyo.jpg" 
+},
+{
+  id: 3, name: 'Los Angeles', country: "USA",description: "iconic film industry", image:"/images/hollywood.jpg" 
 }]
 
 module.exports = destinations;

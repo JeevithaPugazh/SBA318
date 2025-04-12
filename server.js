@@ -5,11 +5,18 @@ const PORT = 3000;
 const path = require("path");
 const error = require("./utilities/error");
 const destinations = require("./data/destinations");
+const methodOverride = require("method-override");
+
+var LocalStorage = require('node-localstorage').LocalStorage,
+localStorage = new LocalStorage('./scratch');
+localStorage.setItem("test", "value");
+console.log(localStorage.getItem("test"))
 
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(methodOverride("_method"));
 
 //view engine
 app.set("view engine", "ejs");
@@ -19,6 +26,7 @@ app.set("views", path.join(__dirname, "views"));
 const destinationRoutes = require("./routes/destinations");
 const activitieRoutes = require("./routes/activities");
 const reviewsRoutes = require("./routes/reviews");
+
 
 app.use("/api/destinations", destinationRoutes);
 app.use("/api/activities", activitieRoutes);

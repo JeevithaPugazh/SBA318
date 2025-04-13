@@ -53,10 +53,7 @@ router.get("/:id", (req, res, next) => {
   }
 
   res.render("details", {
-    id: `${selectedDestination.id}`,
-    title: `${selectedDestination.name}`,
-    image: `${selectedDestination.image}`,
-    description: `${selectedDestination.description}`,
+    ...selectedDestination,
     activities: destinationActivities,
     reviews: filteredReviews,
   });

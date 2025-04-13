@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 const error = require("../utilities/error");
 let reviews = require("../data/reviews");
-const destinations = require("../data/destinations"); 
+const destinations = require("../data/destinations");
+const activities = require("../data/activities");
+const getDestinationData = require("../utilities/common");
 
 // GET all reviews or filter by destinationId and rating
 router.get("/", (req, res) => {
@@ -60,18 +62,22 @@ router.post("/", (req, res) => {
   }
 
   reviews.push(newReview);
-  res
-    .status(201)
-    .redirect(`/api/destinations/${destinationId}/reviews`);
+// console.log(destinationId,getDestinationData(destinationId, reviews))
+  res.render(
+    "details",
+    getDestinationData(destinationId, reviews)
+  );
+
+  // res
+  //   .status(201)
+  //   .redirect(`/api/destinations/${destinationId}/reviews`);
 });
 
 //get reviews by id
 router.get("/:id", (req, res, next) => {
   const reviewId = parseInt(req.params.id);
 
-  const review = reviews.filter(
-    (r) => r.id == reviewId
-  );
+  const review = reviews.filter((r) => r.id == reviewId);
   if (review) {
     res.json(review);
   } else next();
@@ -89,7 +95,7 @@ router.get("/:id/edit", (req, res) => {
       .json({ error: "Resource Not found" });
   }
   // res.json({ message: "This would be the edit form", review });
-  res.render("editView", { review });
+  res.render("editView", { review, destinations });
 });
 
 // Handle patch (Update)
@@ -117,13 +123,14 @@ router.patch("/:id", (req, res) => {
 });
 
 // Handle DELETE
-router.delete("/:id", (req, res,next) => {
+router.delete("/:id", (req, res, next) => {
   const reviewId = parseInt(req.params.id);
   const review = reviews.find((r) => r.id === reviewId);
-  if(!review){
-    return error(404,"Review not found")
+  if (!review) {
+    return error(404, "Review not found");
   }
-  const destinationId = review.destinationId
+  const destinationId = review.destinationId;
+
   const links = [
     {
       href: "/api/reviews/:destinationId",
@@ -131,14 +138,17 @@ router.delete("/:id", (req, res,next) => {
       type: "GET",
     },
   ];
-  
+
   const index = reviews.findIndex((r) => r.id === reviewId);
   if (index !== -1) {
     reviews.splice(index, 1);
   }
-  
- 
-  res.redirect(`/api/reviews?destination=${destinationId}`);
+
+  // res.redirect(`/api/reviews?destination=${destinationId}`);
+  res.render(
+    "details",
+    getDestinationData(destinationId, reviews)
+  );
 });
 //////////////////////////////////////////////////////////
 

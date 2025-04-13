@@ -5,6 +5,19 @@ const destinations = require("../data/destinations");
 const reviews = require("../data/reviews");
 const { title } = require("process");
 
+//Get all destination data
+router.get("/", (req, res) => {
+  const links = [
+    {
+      href: "destination/:id",
+      rel: ":id",
+      type: "GET",
+    },
+  ];
+
+  res.json({ destinations, links });
+});
+//Get all destination data
 router.get("/", (req, res) => {
   const links = [
     {
@@ -17,10 +30,14 @@ router.get("/", (req, res) => {
   res.json({ destinations, links });
 });
 
-router.get("/:id", (req, res) => {
+//Get destination by id
+router.get("/:id", (req, res, next) => {
   const selectedDestination = destinations.find(
     (d) => d.id === parseInt(req.params.id)
   );
+  if (!selectedDestination) {
+    return error(404, "Destination not found");
+  }
   const destinationActivities = activities.filter(
     (a) => a.destinationId === selectedDestination.id
   );
@@ -28,8 +45,11 @@ router.get("/:id", (req, res) => {
     (r) => r.destinationId === selectedDestination.id
   );
 
-  if (!selectedDestination) {
-    return res.status(404).send("Destination not found");
+  const rating = parseInt(req.query.rating);
+  if (!isNaN(rating)) {
+    filteredReviews = filteredReviews.filter(
+      (r) => r.rating === rating
+    );
   }
 
   res.render("details", {
@@ -42,18 +62,15 @@ router.get("/:id", (req, res) => {
   });
 });
 
-router.post("/:id/activity", (req, res) => {
-  const newActivity = {
-    id: activities.length + 1,
-    destinationId: parseInt(req.params.id),
-    activity: req.body.activity,
-  };
-  activities.push(newActivity);
-  res.redirect(`/${req.params.id}`);
-});
-
 //get reviews by destination id
 router.get("/:id/reviews", (req, res, next) => {
+  const links = [
+    {
+      href: "/api/destination/:id",
+      rel: ":id",
+      type: "GET",
+    },
+  ];
   const destinationId = parseInt(req.params.id);
   const rating = parseInt(req.query.rating);
 
@@ -68,12 +85,24 @@ router.get("/:id/reviews", (req, res, next) => {
     const selectedRatingsComment = selectedRatings.map(
       (c) => c.comment
     );
-    res.json(selectedRatingsComment);
+    res.json({ selectedRatingsComment, links });
   } else {
-    res.json(destinationReviews);
+    res.json({ destinationReviews, links });
   }
 });
 
+router.delete("/:id/reviews", (req, res) => {
+  const destinationId = parseInt(req.params.id);
+  const rating = parseInt(req.query.rating);
+  const destinationReviews = reviews.filter(
+    (r) => r.destinationId === destinationId
+  );
+  if (!isNaN(rating)) {
+    const selectedRatings = destinationReviews.filter(
+      (d) => d.rating === rating
+    );
+  }
+});
 //filter reviews by rating
 // router.get("/:id/reviews/:rating", (req, res, next) => {
 //   const destinationId = parseInt(req.params.id);

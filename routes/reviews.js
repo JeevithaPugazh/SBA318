@@ -2,36 +2,43 @@ const express = require("express");
 const router = express.Router();
 const error = require("../utilities/error");
 let reviews = require("../data/reviews");
+const destinations = require("../data/destinations"); 
 
 // GET all reviews or filter by destinationId and rating
 router.get("/", (req, res) => {
-  // let filteredReviews = reviews;
-
-  // if (req.query.destinationId) {
-  //   filteredReviews = filteredReviews.filter(
-  //     (r) => r.destinationId === parseInt(req.query.destinationId)
-  //   );
-  // }
-
-  // if (req.query.rating) {
-  //   filteredReviews = filteredReviews.filter(
-  //     (r) => r.rating === parseInt(req.query.rating)
-  //   );
-  // }
-
+  const destination = parseInt(req.query.destination);
+  let filteredReviews = reviews;
   const links = [
     {
-      href: "reviews/:id",
+      href: "/api/reviews/:id",
       rel: ":id",
       type: "GET",
     },
   ];
-
-  res.json({ reviews, links });
+  if (req.query.rating) {
+    filteredReviews = filteredReviews.filter(
+      (r) => r.rating === parseInt(req.query.rating)
+    );
+  }
+  if (destination) {
+    const destinationReviews = reviews.filter(
+      (r) => r.destinationId == destination
+    );
+    res.json({ destinationReviews, links });
+  } else {
+    res.json({ reviews, links });
+  }
 });
 
 // Add a new review
 router.post("/", (req, res) => {
+  const links = [
+    {
+      href: "/api/destinations/:id",
+      rel: ":id",
+      type: "GET",
+    },
+  ];
   const { destinationId, rating, comment } = req.body;
 
   if (!destinationId || !rating || !comment) {
@@ -46,52 +53,93 @@ router.post("/", (req, res) => {
     rating: parseInt(rating),
     comment,
   };
+  if (parseInt(req.params.id)) {
+    reviews = reviews.filter(
+      (r) => r.destinationId === parseInt(req.params.id)
+    );
+  }
 
   reviews.push(newReview);
-  res.status(201).json(newReview);
+  res
+    .status(201)
+    .redirect(`/api/destinations/${destinationId}/reviews`);
 });
 
 //get reviews by id
-router.get("/:id",
-  (req, res, next) => {
-    const reviewId = parseInt(req.params.id);
-    const review = reviews.find((r) => r.id == reviewId);
+router.get("/:id", (req, res, next) => {
+  const reviewId = parseInt(req.params.id);
 
-    if (review) res.json(review);
-    else next();
-  });
+  const review = reviews.filter(
+    (r) => r.id == reviewId
+  );
+  if (review) {
+    res.json(review);
+  } else next();
+});
+//////////
 
-// Update a review (PATCH)
-router.patch("/:id", (req, res) => {
+// Show Edit Form
+router.get("/:id/edit", (req, res) => {
   const reviewId = parseInt(req.params.id);
   const review = reviews.find((r) => r.id === reviewId);
 
-  if (!review)
+  if (!review) {
     return res
       .status(404)
-      .json({ error: "Review not found" });
+      .json({ error: "Resource Not found" });
+  }
+  // res.json({ message: "This would be the edit form", review });
+  res.render("editView", { review });
+});
 
+// Handle patch (Update)
+router.patch("/:id", (req, res) => {
+  const reviewId = parseInt(req.params.id);
   const { rating, comment } = req.body;
 
-  if (rating !== undefined)
-    review.rating = parseInt(rating);
-  if (comment !== undefined) review.comment = comment;
+  const reviewIndex = reviews.findIndex(
+    (r) => r.id === reviewId
+  );
 
-  res.json(review);
-});
-
-// Delete a review
-router.delete("/:id", (req, res) => {
-  const reviewId = parseInt(req.params.id);
-  const index = reviews.findIndex((r) => r.id === reviewId);
-
-  if (index === -1)
+  if (reviewIndex === -1) {
     return res
       .status(404)
       .json({ error: "Review not found" });
+  }
 
-  reviews.splice(index, 1);
-  res.status(204).send();
+  if (rating)
+    reviews[reviewIndex].rating = parseInt(rating);
+  if (comment) reviews[reviewIndex].comment = comment;
+
+  const destinationId = reviews[reviewIndex].destinationId;
+
+  res.redirect(`/api/destinations/${destinationId}`);
 });
+
+// Handle DELETE
+router.delete("/:id", (req, res,next) => {
+  const reviewId = parseInt(req.params.id);
+  const review = reviews.find((r) => r.id === reviewId);
+  if(!review){
+    return error(404,"Review not found")
+  }
+  const destinationId = review.destinationId
+  const links = [
+    {
+      href: "/api/reviews/:destinationId",
+      rel: ":id",
+      type: "GET",
+    },
+  ];
+  
+  const index = reviews.findIndex((r) => r.id === reviewId);
+  if (index !== -1) {
+    reviews.splice(index, 1);
+  }
+  
+ 
+  res.redirect(`/api/reviews?destination=${destinationId}`);
+});
+//////////////////////////////////////////////////////////
 
 module.exports = router;

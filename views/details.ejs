@@ -39,10 +39,37 @@
     <ul>
       <% reviews.forEach(review => { %>
       <li>
-        Rating:<%= review.rating %> - <%= review.comment%>
+        <b>Rating:</b><%= review.rating %> - <%=
+        review.comment%><br />
+        <form
+          action="/api/reviews/<%= review.id %>/edit"
+          method="GET"
+          style="display: inline"
+        >
+          <button>Edit</button>
+        </form>
+        <form
+          action="/api/reviews/<%= review.id %>?_method=DELETE"
+          method="POST"
+          style="display: inline"
+        >
+          <button>Delete</button>
+        </form>
       </li>
       <br />
       <% }) %>
     </ul>
+    <h3>Add a Review</h3>
+<form action="/api/reviews/" method="POST">
+  <input type="hidden" name="destinationId" value="<%= id %>" />
+
+  <label for="rating">Rating:</label>
+  <input type="number" name="rating" min="1" max="5" required />
+
+  <label for="comment">Comment:</label>
+  <input type="text" name="comment" required />
+
+  <button type="submit">Submit Review</button>
+</form>
   </body>
 </html>

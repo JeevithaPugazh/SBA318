@@ -7,15 +7,17 @@
   <body>
     <h1>🚗Welcome to <%= title %>😎</h1>
     <h2>Explore our destinations</h2>
+
     <ul>
       <% destinations.forEach((destination)=>{ %>
       <li>
-        <a href="/api/destinations/<%= destination.id %>"><%= destination.name %></a>
+        <a href="/api/destinations/<%= destination.id %>"
+          ><%= destination.name %></a
+        >
 
         <img
           src="<%= destination.image %>"
           alt="<%= destination.name %>"
-          width="200"
         />
       </li>
       <%})%>

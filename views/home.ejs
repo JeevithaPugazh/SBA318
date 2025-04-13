@@ -8,17 +8,42 @@
     <h1>🚗Welcome to <%= title %>😎</h1>
     <h2>Explore our destinations</h2>
 
-    <ul>
+    <ul
+      style="
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        justify-content: space-around;
+      "
+    >
       <% destinations.forEach((destination)=>{ %>
       <li>
-        <a href="/api/destinations/<%= destination.id %>"
-          ><%= destination.name %></a
+        <div>
+          <a href="/api/destinations/<%= destination.id %>"
+            ><img
+              src="<%= destination.image %>"
+              alt="<%= destination.name %>"
+          /></a>
+        </div>
+        <div
+          style="
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          "
         >
-
-        <img
-          src="<%= destination.image %>"
-          alt="<%= destination.name %>"
-        />
+          <a
+            href="/api/destinations/<%= destination.id %>"
+            style="
+              color: antiquewhite;
+              font-weight: 700;
+              font-size: large;
+            "
+            ><%= destination.name %></a
+          >
+        </div>
       </li>
       <%})%>
     </ul>
